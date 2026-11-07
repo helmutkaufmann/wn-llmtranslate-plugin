@@ -5,7 +5,7 @@
     </ul>
 <?php Block::endPut() ?>
 
-<div class="padded-container">
+<div class="padded-container mt-review">
     <?= Form::open(['id' => 'reviewForm', 'onsubmit' => 'return false']) ?>
         <div id="reviewContainer"><?= $this->makePartial('list') ?></div>
     <?= Form::close() ?>

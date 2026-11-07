@@ -25,6 +25,8 @@ class Review extends Controller
         parent::__construct();
         BackendMenu::setContext('Winter.System', 'system', 'settings');
         SettingsManager::setContext('Mercator.LlmTranslate', 'review');
+        $this->addCss('/plugins/mercator/llmtranslate/assets/css/review.css');
+        $this->addJs('/plugins/mercator/llmtranslate/assets/js/review.js');
     }
 
     public function index()

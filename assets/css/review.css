@@ -1,0 +1,47 @@
+.mt-review { --mt-border:#e3e7eb; --mt-muted:#6b7785; --mt-ok:#2f9e5f; --mt-warn:#d98e04; --mt-accent:#2b6cb0; --mt-bg:#fff; }
+
+/* summary + toolbar */
+.mt-review .mt-top { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:18px; }
+.mt-review .mt-seg { display:inline-flex; border:1px solid var(--mt-border); border-radius:999px; background:#f5f7f9; padding:3px; }
+.mt-review .mt-seg a { padding:6px 16px; border-radius:999px; font-weight:600; font-size:13px; color:var(--mt-muted); text-decoration:none; cursor:pointer; }
+.mt-review .mt-seg a.on { background:var(--mt-bg); color:#1d2733; box-shadow:0 1px 3px rgba(0,0,0,.12); }
+.mt-review .mt-seg .n { display:inline-block; min-width:20px; margin-left:6px; padding:0 6px; border-radius:10px; background:var(--mt-warn); color:#fff; font-size:11px; line-height:18px; text-align:center; }
+.mt-review .mt-top select { width:auto; min-width:130px; border-radius:999px; }
+.mt-review .mt-grow { flex:1; }
+
+/* cards */
+.mt-review .mt-card { background:var(--mt-bg); border:1px solid var(--mt-border); border-left:4px solid var(--mt-warn); border-radius:8px; margin-bottom:12px; box-shadow:0 1px 2px rgba(16,24,40,.04); overflow:hidden; }
+.mt-review .mt-card.reviewed { border-left-color:var(--mt-ok); }
+.mt-review .mt-card.is-dirty { border-left-color:var(--mt-accent); }
+.mt-review .mt-head { display:flex; align-items:center; gap:8px; padding:10px 16px; border-bottom:1px solid var(--mt-border); background:#fafbfc; }
+.mt-review .mt-title { font-weight:600; color:#1d2733; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.mt-review .mt-kind { font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--mt-muted); }
+.mt-review .mt-lang { display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:600; padding:2px 9px; border-radius:999px; background:#e8f0fb; color:var(--mt-accent); }
+.mt-review .mt-status { margin-left:auto; font-size:12px; font-weight:600; padding:2px 10px; border-radius:999px; background:#fdf3dc; color:#9a6700; white-space:nowrap; }
+.mt-review .mt-card.reviewed .mt-status { background:#e3f5ea; color:#1f7a47; }
+
+.mt-review .mt-body { display:grid; grid-template-columns:1fr 1fr; }
+.mt-review .mt-col { padding:14px 16px; min-width:0; }
+.mt-review .mt-col + .mt-col { border-left:1px solid var(--mt-border); }
+.mt-review .mt-label { font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--mt-muted); margin-bottom:6px; font-weight:600; }
+.mt-review .mt-src { white-space:pre-wrap; word-break:break-word; color:#3b4856; line-height:1.5; }
+.mt-review .mt-col textarea { box-sizing:border-box; width:100%; font-family:inherit; font-size:inherit; color:#1d2733; min-height:64px; resize:vertical; border:1px solid var(--mt-border); border-radius:6px; padding:8px 10px; line-height:1.5; background:#fff; }
+.mt-review .mt-col textarea:focus { border-color:var(--mt-accent); outline:0; box-shadow:0 0 0 3px rgba(43,108,176,.15); }
+
+.mt-review .mt-foot { display:flex; align-items:center; gap:10px; padding:9px 16px; border-top:1px solid var(--mt-border); background:#fafbfc; font-size:12px; color:var(--mt-muted); }
+.mt-review .mt-chip { padding:1px 8px; border-radius:4px; background:#eef1f4; color:#4a5663; font-family:ui-monospace,Menlo,monospace; font-size:11px; }
+.mt-review .mt-actions { margin-left:auto; display:flex; gap:8px; }
+.mt-review .mt-save { display:none; }
+.mt-review .mt-card.is-dirty .mt-save { display:inline-block; }
+.mt-review .mt-card.is-dirty .mt-approve { display:none; }
+
+/* empty / pager */
+.mt-review .mt-empty { text-align:center; padding:60px 20px; color:var(--mt-muted); border:2px dashed var(--mt-border); border-radius:10px; }
+.mt-review .mt-empty .mt-check { font-size:42px; color:var(--mt-ok); display:block; margin-bottom:8px; }
+.mt-review .mt-pager { text-align:center; margin:20px 0; color:var(--mt-muted); }
+.mt-review .mt-pager .btn { margin:0 8px; }
+
+@media (max-width: 800px) {
+    .mt-review .mt-body { grid-template-columns:1fr; }
+    .mt-review .mt-col + .mt-col { border-left:0; border-top:1px solid var(--mt-border); }
+}

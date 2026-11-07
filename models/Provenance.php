@@ -87,7 +87,9 @@ class Provenance extends Model
     public function label(): string
     {
         if ($this->kind === 'message') {
-            return optional($this->targetModel())->code ?: '#' . $this->model_id;
+            $code = (string) optional($this->targetModel())->code;
+            // message codes are usually md5 hashes: not meaningful to a reviewer
+            return ($code === '' || preg_match('/^[a-f0-9]{32}$/', $code)) ? '#' . $this->model_id : $code;
         }
         return class_basename($this->model_type) . ' #' . $this->model_id . ' / ' . $this->field;
     }

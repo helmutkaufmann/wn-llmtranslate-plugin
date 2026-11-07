@@ -69,6 +69,7 @@ return [
         'col_by' => 'Maschinelle Übersetzung',
         'missing' => 'Element existiert nicht mehr',
         'edited' => 'bearbeitet',
+        'save_approve' => 'Speichern & freigeben',
         'save' => 'Speichern',
         'approve' => 'Freigeben',
         'label' => 'Maschinelle Übersetzungen prüfen',

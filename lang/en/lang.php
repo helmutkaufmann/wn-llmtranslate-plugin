@@ -69,6 +69,7 @@ return [
         'col_by' => 'Machine translation',
         'missing' => 'item no longer exists',
         'edited' => 'edited',
+        'save_approve' => 'Save & approve',
         'save' => 'Save',
         'approve' => 'Approve',
         'label' => 'Review machine translations',

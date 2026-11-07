@@ -8,7 +8,7 @@ return [
     'settings' => [
         'label' => 'LLM-Übersetzungs-Endpunkte',
         'description' => 'OpenAI-/Anthropic-kompatible Endpunkte für die maschinelle Übersetzung konfigurieren.',
-        'tab' => 'LLM (OpenAI / Anthropic)',
+        'tab' => 'LLM',
         'endpoints' => 'Endpunkte',
         'endpoints_comment' => 'Jeder Endpunkt erscheint als Übersetzungsmethode. Für lokale Server den API-Schlüssel leer lassen.',
         'name' => 'Name',

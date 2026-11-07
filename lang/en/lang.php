@@ -8,7 +8,7 @@ return [
     'settings' => [
         'label' => 'LLM translation endpoints',
         'description' => 'Configure OpenAI/Anthropic-compatible endpoints used for machine translation.',
-        'tab' => 'LLM (OpenAI / Anthropic)',
+        'tab' => 'LLM',
         'endpoints' => 'Endpoints',
         'endpoints_comment' => 'Each endpoint appears as a translation method in the copy picker and in the Messages screen. Leave the API key empty for local servers.',
         'name' => 'Name',

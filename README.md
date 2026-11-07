@@ -91,7 +91,7 @@ Enable it in the LLM tab, choose an endpoint and list the models. When a listed 
 
 - Filter by status, type (UI messages / model fields), language and provider.
 - **Approve** a translation, or edit it and **Save & approve**. Editing a machine translation anywhere (for example in the Messages screen or a model form) marks it reviewed automatically.
-- **Delete** a translation (removes the target text, keeps the source), or **Delete all unreviewed** in the current filter. Reviewed translations are never touched by bulk delete.
+- **Delete** a translation (removes the target text, keeps the source), or **Delete all** translations in the current filter (every page, any status; the confirmation warns when reviewed translations are included). Combine it with the filters to target exactly what you want, e.g. one language or one provider.
 
 ## Permissions
 

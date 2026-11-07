@@ -114,11 +114,11 @@ class Review extends Controller
         return $this->refresh();
     }
 
-    /** Deletes every UNREVIEWED translation matching the filter. Reviewed ones are never touched. */
+    /** Deletes every translation matching the current filter (all pages, any status). */
     public function onDeleteAll()
     {
         $n = 0;
-        $this->filtered()->where('status', Provenance::MACHINE)->orderBy('id')->chunkById(100, function ($rows) use (&$n) {
+        $this->filtered()->orderBy('id')->chunkById(100, function ($rows) use (&$n) {
             foreach ($rows as $row) {
                 $row->discard();
                 $n++;

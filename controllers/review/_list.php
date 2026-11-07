@@ -30,9 +30,9 @@
     <a href="javascript:;" class="btn btn-success oc-icon-check" data-request="onApproveAll"
        data-request-confirm="<?= $t('approve_all_confirm', ['count' => $total]) ?>"><?= $t('approve_all') ?> (<?= $total ?>)</a>
     <?php endif ?>
-    <?php if ($f['status'] === 'machine' && $total): ?>
+    <?php if ($total): ?>
     <a href="javascript:;" class="btn btn-danger oc-icon-trash-o" data-request="onDeleteAll"
-       data-request-confirm="<?= $t('delete_all_confirm', ['count' => $total]) ?>"><?= $t('delete_all') ?></a>
+       data-request-confirm="<?= $t($f['status'] === 'machine' ? 'delete_all_confirm' : 'delete_all_confirm_reviewed', ['count' => $total]) ?>"><?= $t('delete_all') ?> (<?= $total ?>)</a>
     <?php endif ?>
 </div>
 

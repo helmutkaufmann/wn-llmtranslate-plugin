@@ -26,6 +26,15 @@ class Settings extends Model
         $this->endpoints = [Config::get('mercator.llmtranslate::default_endpoint')];
     }
 
+    public function getAutoProviderOptions(): array
+    {
+        $opts = [];
+        foreach (static::providerConfigs() as $slug => $cfg) {
+            $opts[$slug] = $slug;
+        }
+        return $opts;
+    }
+
     /**
      * @return array<string, array> provider config keyed by provider slug
      */

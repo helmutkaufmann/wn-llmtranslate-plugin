@@ -25,6 +25,11 @@ return [
         'glossary' => 'Glossary',
         'models' => 'Translatable models',
         'models_comment' => 'One model class per line (e.g. RainLab\\Blog\\Models\\Post). Only models using the TranslatableModel behavior are offered for translation.',
+        'auto_enabled' => 'Auto-translate on save',
+        'auto_enabled_comment' => 'Queues a translation of changed default-language fields into all other enabled languages whenever a listed model is saved. Needs a running queue worker (php artisan queue:work). Human and reviewed translations are never overwritten.',
+        'auto_provider' => 'Provider for auto-translate',
+        'auto_models' => 'Auto-translate models',
+        'auto_models_comment' => 'One model class per line; must also be listed under Translatable models.',
         'glossary_comment' => 'One term per line as "source = target". Used consistently in translations.',
     ],
     'messages' => [

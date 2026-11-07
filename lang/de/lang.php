@@ -25,6 +25,11 @@ return [
         'glossary' => 'Glossar',
         'models' => 'Übersetzbare Modelle',
         'models_comment' => 'Eine Modellklasse pro Zeile (z. B. RainLab\\Blog\\Models\\Post). Nur Modelle mit TranslatableModel-Behavior stehen zur Übersetzung zur Verfügung.',
+        'auto_enabled' => 'Beim Speichern automatisch übersetzen',
+        'auto_enabled_comment' => 'Stellt beim Speichern eines gelisteten Modells eine Übersetzung der geänderten Standardsprache-Felder in alle anderen aktivierten Sprachen in die Warteschlange. Benötigt einen laufenden Queue-Worker (php artisan queue:work). Manuelle und geprüfte Übersetzungen werden nie überschrieben.',
+        'auto_provider' => 'Anbieter für die automatische Übersetzung',
+        'auto_models' => 'Automatisch zu übersetzende Modelle',
+        'auto_models_comment' => 'Eine Modellklasse pro Zeile; muss auch unter Übersetzbare Modelle stehen.',
         'glossary_comment' => 'Ein Begriff pro Zeile als "Quelle = Ziel".',
     ],
     'messages' => [

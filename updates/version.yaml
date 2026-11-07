@@ -3,3 +3,5 @@
 1.1.0:
     - Machine-translation provenance and review workflow, model attribute translation
     - create_provenance_table.php
+1.2.0:
+    - Optional auto-translate on save for configured models (queued)

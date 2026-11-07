@@ -143,6 +143,59 @@ class BulkTranslator
         return [$done, $remaining];
     }
 
+    /**
+     * Translates the given default-language fields of ONE record into the
+     * targets. Human or reviewed translations are never touched: only empty
+     * values and still-unreviewed machine translations (now stale) are written.
+     *
+     * @return int number of values written
+     */
+    public static function modelFields(string $provider, Model $model, array $fields, array $targets): int
+    {
+        $default = static::defaultCode();
+        $translator = ProviderFactory::create($provider);
+        $model->noFallbackLocale();
+        $written = 0;
+
+        foreach (static::cleanTargets($targets, $default) as $to) {
+            $jobs = [];
+            foreach ($fields as $name) {
+                if (in_array($name, static::skipFields(), true)) {
+                    continue;
+                }
+                $source = $model->getAttributeTranslated($name, $default);
+                if (!is_string($source) || trim($source) === '') {
+                    continue;
+                }
+                if ($model->getAttributeTranslated($name, $to)) {
+                    $isMachine = Provenance::where([
+                        'kind' => 'attribute', 'model_type' => $model->getMorphClass(), 'model_id' => $model->getKey(),
+                        'field' => $name, 'locale' => $to, 'status' => Provenance::MACHINE,
+                    ])->exists();
+                    if (!$isMachine) {
+                        continue;
+                    }
+                }
+                $jobs[] = [$name, $source];
+            }
+            if (!$jobs) {
+                continue;
+            }
+
+            $out = $translator->translate(array_column($jobs, 1), $to, $default);
+            Provenance::withoutTracking(function () use ($jobs, $out, $to, $provider, $model) {
+                foreach ($jobs as $i => [$name]) {
+                    $model->setAttributeTranslated($name, $out[$i], $to);
+                    Provenance::record('attribute', $model->getMorphClass(), (int) $model->getKey(), $name, $to, null, $provider);
+                }
+                $model->save();
+            });
+            $written += count($jobs);
+        }
+
+        return $written;
+    }
+
     /** @return string[] */
     protected static function cleanTargets(array $targets, string $sourceLang): array
     {
@@ -164,6 +217,24 @@ class BulkTranslator
         foreach ($lines as $line) {
             $class = ltrim(trim($line), '\\');
             if ($class !== '' && static::isTranslatableModel($class)) {
+                $out[] = $class;
+            }
+        }
+        return array_values(array_unique($out));
+    }
+
+    /** Models with auto-translate on save enabled (subset of the configured ones). */
+    public static function autoModels(): array
+    {
+        if (!\Mercator\LlmTranslate\Models\Settings::get('auto_enabled')) {
+            return [];
+        }
+        $lines = preg_split('/\R/', (string) \Mercator\LlmTranslate\Models\Settings::get('auto_models', ''));
+        $configured = static::configuredModels();
+        $out = [];
+        foreach ($lines as $line) {
+            $class = ltrim(trim($line), '\\');
+            if ($class !== '' && in_array($class, $configured, true)) {
                 $out[] = $class;
             }
         }

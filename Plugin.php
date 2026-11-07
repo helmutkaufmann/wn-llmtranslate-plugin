@@ -71,8 +71,9 @@ class Plugin extends PluginBase
 
     public function boot()
     {
-        // Providers are only needed in the backend (copy picker, Messages screen).
-        if (App::runningInBackend()) {
+        // Needed in the backend (picker, Messages screen) and in console
+        // processes (artisan command, queue worker running auto-translate jobs).
+        if (App::runningInBackend() || App::runningInConsole()) {
             try {
                 Settings::applyConfigValues();
             }
@@ -119,6 +120,8 @@ class Plugin extends PluginBase
         catch (\Throwable $e) {
             return;
         }
+        $this->registerAutoTranslate();
+
         foreach ($classes as $class) {
             $class::extend(function ($model) {
                 $model->bindEvent('model.saveInternal', function () use ($model) {
@@ -131,6 +134,47 @@ class Plugin extends PluginBase
                         }
                     }
                 }, 100);
+            });
+        }
+    }
+
+    /**
+     * Opt-in: when a listed model is saved with changed default-language text,
+     * queue a job translating just those fields into the other languages.
+     */
+    protected function registerAutoTranslate(): void
+    {
+        try {
+            $classes = BulkTranslator::autoModels();
+            $provider = (string) Settings::get('auto_provider');
+        }
+        catch (\Throwable $e) {
+            return;
+        }
+        if (!$classes || !array_key_exists($provider, static::usableProviders())) {
+            return;
+        }
+
+        foreach ($classes as $class) {
+            $class::extend(function ($model) use ($provider) {
+                $model->bindEvent('model.afterSave', function () use ($model, $provider) {
+                    if (Provenance::$writing) {
+                        return;
+                    }
+                    $fields = array_values(array_intersect(
+                        array_keys($model->getDirty()),
+                        $model->getTranslatableAttributes()
+                    ));
+                    if (!$fields) {
+                        return;
+                    }
+                    \Queue::push(Classes\AutoTranslateJob::class, [
+                        'class'    => get_class($model),
+                        'id'       => $model->getKey(),
+                        'fields'   => $fields,
+                        'provider' => $provider,
+                    ]);
+                });
             });
         }
     }

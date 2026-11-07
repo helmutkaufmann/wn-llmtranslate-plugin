@@ -52,3 +52,24 @@ fields:
         type: textarea
         size: small
         placeholder: RainLab\\Blog\\Models\\Post
+    auto_enabled:
+        label: mercator.llmtranslate::lang.settings.auto_enabled
+        comment: mercator.llmtranslate::lang.settings.auto_enabled_comment
+        type: switch
+        default: false
+    auto_provider:
+        label: mercator.llmtranslate::lang.settings.auto_provider
+        type: dropdown
+        trigger:
+            action: show
+            field: auto_enabled
+            condition: checked
+    auto_models:
+        label: mercator.llmtranslate::lang.settings.auto_models
+        commentAbove: mercator.llmtranslate::lang.settings.auto_models_comment
+        type: textarea
+        size: small
+        trigger:
+            action: show
+            field: auto_enabled
+            condition: checked

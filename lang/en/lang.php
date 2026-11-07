@@ -1,0 +1,46 @@
+<?php
+
+return [
+    'plugin' => [
+        'name' => 'LLM Translate',
+        'description' => 'Machine translation through OpenAI- or Anthropic-compatible APIs (incl. local servers).',
+    ],
+    'settings' => [
+        'label' => 'LLM translation endpoints',
+        'description' => 'Configure OpenAI/Anthropic-compatible endpoints used for machine translation.',
+        'endpoints' => 'Endpoints',
+        'endpoints_comment' => 'Each endpoint appears as a translation method in the copy picker and in the Messages screen. Leave the API key empty for local servers.',
+        'name' => 'Name',
+        'name_comment' => 'Shown in the picker, e.g. "local" or "claude".',
+        'format' => 'API format',
+        'format_openai' => 'OpenAI-compatible (/chat/completions)',
+        'format_anthropic' => 'Anthropic-compatible (/v1/messages)',
+        'base_url' => 'Base URL',
+        'base_url_comment' => 'OpenAI: include /v1, e.g. http://localhost:11434/v1. Anthropic: https://api.anthropic.com',
+        'model' => 'Model',
+        'api_key' => 'API key',
+        'batch_size' => 'Batch size',
+        'instructions' => 'Extra instructions',
+        'instructions_comment' => 'Tone, formality, domain hints. Applied to every endpoint.',
+        'glossary' => 'Glossary',
+        'glossary_comment' => 'One term per line as "source = target". Used consistently in translations.',
+    ],
+    'messages' => [
+        'button' => 'Machine translate',
+        'title' => 'Machine translate messages',
+        'provider' => 'Translation method',
+        'overwrite' => 'Overwrite existing translations',
+        'help' => 'Translates messages that are empty in the target language from the selected source language (or the default language when none is selected). Up to :max messages per run.',
+        'all_languages' => 'Translate into all enabled languages',
+        'all_label' => 'all enabled languages',
+        'run' => 'Translate',
+        'no_provider' => 'No translation endpoint is configured. Add one under Settings -> LLM translation endpoints.',
+        'no_target' => 'Select a target language in the Messages screen first.',
+        'nothing' => 'Nothing to translate.',
+        'done' => ':count messages translated.',
+        'done_remaining' => ':count messages translated, :remaining remaining - run again to continue.',
+    ],
+    'permissions' => [
+        'manage_settings' => 'Manage LLM translation endpoints',
+    ],
+];

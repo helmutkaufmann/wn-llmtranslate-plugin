@@ -1,0 +1,46 @@
+<?php
+
+return [
+    'plugin' => [
+        'name' => 'LLM-Übersetzung',
+        'description' => 'Maschinelle Übersetzung über OpenAI- oder Anthropic-kompatible APIs (inkl. lokaler Server).',
+    ],
+    'settings' => [
+        'label' => 'LLM-Übersetzungs-Endpunkte',
+        'description' => 'OpenAI-/Anthropic-kompatible Endpunkte für die maschinelle Übersetzung konfigurieren.',
+        'endpoints' => 'Endpunkte',
+        'endpoints_comment' => 'Jeder Endpunkt erscheint als Übersetzungsmethode. Für lokale Server den API-Schlüssel leer lassen.',
+        'name' => 'Name',
+        'name_comment' => 'Anzeige in der Auswahl, z. B. "local" oder "claude".',
+        'format' => 'API-Format',
+        'format_openai' => 'OpenAI-kompatibel (/chat/completions)',
+        'format_anthropic' => 'Anthropic-kompatibel (/v1/messages)',
+        'base_url' => 'Basis-URL',
+        'base_url_comment' => 'OpenAI: inkl. /v1, z. B. http://localhost:11434/v1. Anthropic: https://api.anthropic.com',
+        'model' => 'Modell',
+        'api_key' => 'API-Schlüssel',
+        'batch_size' => 'Batch-Grösse',
+        'instructions' => 'Zusätzliche Anweisungen',
+        'instructions_comment' => 'Tonalität, Anrede, Fachgebiet. Gilt für alle Endpunkte.',
+        'glossary' => 'Glossar',
+        'glossary_comment' => 'Ein Begriff pro Zeile als "Quelle = Ziel".',
+    ],
+    'messages' => [
+        'button' => 'Maschinell übersetzen',
+        'title' => 'Meldungen maschinell übersetzen',
+        'provider' => 'Übersetzungsmethode',
+        'overwrite' => 'Bestehende Übersetzungen überschreiben',
+        'help' => 'Übersetzt Meldungen, die in der Zielsprache leer sind, aus der gewählten Quellsprache (oder der Standardsprache). Max. :max Meldungen pro Durchlauf.',
+        'all_languages' => 'In alle aktivierten Sprachen übersetzen',
+        'all_label' => 'alle aktivierten Sprachen',
+        'run' => 'Übersetzen',
+        'no_provider' => 'Kein Übersetzungs-Endpunkt konfiguriert. Unter Einstellungen -> LLM-Übersetzungs-Endpunkte hinzufügen.',
+        'no_target' => 'Bitte zuerst eine Zielsprache im Meldungen-Bildschirm wählen.',
+        'nothing' => 'Nichts zu übersetzen.',
+        'done' => ':count Meldungen übersetzt.',
+        'done_remaining' => ':count Meldungen übersetzt, :remaining verbleibend – erneut ausführen.',
+    ],
+    'permissions' => [
+        'manage_settings' => 'LLM-Übersetzungs-Endpunkte verwalten',
+    ],
+];

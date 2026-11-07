@@ -1,0 +1,12 @@
+{
+    "name": "mercator/wn-llmtranslate-plugin",
+    "description": "LLM-based machine translation providers (OpenAI- and Anthropic-compatible) for Winter.Translate",
+    "type": "winter-plugin",
+    "require": {
+        "php": ">=8.2",
+        "winter/wn-translate-plugin": "*"
+    },
+    "autoload": { "psr-4": { "Mercator\\LlmTranslate\\": "" } },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

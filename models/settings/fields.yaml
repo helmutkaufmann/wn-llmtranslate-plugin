@@ -1,0 +1,48 @@
+fields:
+    endpoints:
+        label: mercator.llmtranslate::lang.settings.endpoints
+        commentAbove: mercator.llmtranslate::lang.settings.endpoints_comment
+        type: repeater
+        prompt: Add endpoint
+        form:
+            fields:
+                name:
+                    label: mercator.llmtranslate::lang.settings.name
+                    comment: mercator.llmtranslate::lang.settings.name_comment
+                    span: left
+                    required: true
+                format:
+                    label: mercator.llmtranslate::lang.settings.format
+                    type: dropdown
+                    default: openai
+                    span: right
+                    options:
+                        openai: mercator.llmtranslate::lang.settings.format_openai
+                        anthropic: mercator.llmtranslate::lang.settings.format_anthropic
+                base_url:
+                    label: mercator.llmtranslate::lang.settings.base_url
+                    comment: mercator.llmtranslate::lang.settings.base_url_comment
+                    span: left
+                    required: true
+                model:
+                    label: mercator.llmtranslate::lang.settings.model
+                    span: right
+                    required: true
+                api_key:
+                    label: mercator.llmtranslate::lang.settings.api_key
+                    type: sensitive
+                    span: left
+                batch_size:
+                    label: mercator.llmtranslate::lang.settings.batch_size
+                    type: number
+                    span: right
+    instructions:
+        label: mercator.llmtranslate::lang.settings.instructions
+        commentAbove: mercator.llmtranslate::lang.settings.instructions_comment
+        type: textarea
+        size: small
+    glossary:
+        label: mercator.llmtranslate::lang.settings.glossary
+        commentAbove: mercator.llmtranslate::lang.settings.glossary_comment
+        type: textarea
+        size: small

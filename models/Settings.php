@@ -1,32 +1,51 @@
 <?php namespace Mercator\LlmTranslate\Models;
 
 use Config;
-use Model;
 use Str;
-use Winter\Translate\Providers\TranslationProvider;
+use Winter\Translate\Models\Setting as TranslateSetting;
 use Mercator\LlmTranslate\Classes\LlmTranslateProvider;
 
 /**
- * Backend-configurable LLM endpoints. On boot the endpoints are pushed into
- * `winter.translate::providers.*` so Winter.Translate's ProviderFactory and
- * picker see them like any other provider.
+ * LLM endpoint settings. Stored on Winter.Translate's own settings record
+ * (Settings -> Translation Providers) under `llm_*` keys; the form tab is
+ * injected by Plugin::extendProviderSettingsForm().
+ *
+ * On boot the endpoints are pushed into `winter.translate::providers.*` so
+ * Winter.Translate's ProviderFactory and picker see them like any provider.
  */
-class Settings extends Model
+class Settings
 {
-    public $implement = [\System\Behaviors\SettingsModel::class];
+    const PREFIX = 'llm_';
 
-    public $settingsCode = 'mercator_llmtranslate_settings';
+    protected static $reserved = ['google', 'deepl'];
 
-    public $settingsFields = 'fields.yaml';
-
-    protected $reserved = ['google', 'deepl'];
-
-    public function initSettingsData()
+    public static function get(string $key, $default = null)
     {
-        $this->endpoints = [Config::get('mercator.llmtranslate::default_endpoint')];
+        return TranslateSetting::get(static::PREFIX . $key, $default);
     }
 
-    public function getAutoProviderOptions(): array
+    public static function set($key, $value = null): void
+    {
+        $data = is_array($key) ? $key : [$key => $value];
+        $prefixed = [];
+        foreach ($data as $k => $v) {
+            $prefixed[static::PREFIX . $k] = $v;
+        }
+        TranslateSetting::set($prefixed);
+    }
+
+    public static function instance(): self
+    {
+        return new static;
+    }
+
+    public function __get($key)
+    {
+        return static::get($key);
+    }
+
+    /** @return array<string,string> provider slug => label, for the auto-translate dropdown */
+    public static function providerOptions(): array
     {
         $opts = [];
         foreach (static::providerConfigs() as $slug => $cfg) {
@@ -41,7 +60,7 @@ class Settings extends Model
     public static function providerConfigs(): array
     {
         $settings = static::instance();
-        $endpoints = $settings->endpoints;
+        $endpoints = static::get('endpoints');
         if (!is_array($endpoints) || !$endpoints) {
             $endpoints = [Config::get('mercator.llmtranslate::default_endpoint')];
         }
@@ -52,7 +71,7 @@ class Settings extends Model
             if ($slug === '' || empty($ep['base_url']) || empty($ep['model'])) {
                 continue;
             }
-            if (in_array($slug, $settings->reserved, true) || isset($out[$slug])) {
+            if (in_array($slug, static::$reserved, true) || isset($out[$slug])) {
                 $slug .= '_llm' . count($out);
             }
 

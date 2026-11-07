@@ -2,6 +2,7 @@
 
 use App;
 use Backend\Facades\Backend;
+use Event;
 use Flash;
 use Lang;
 use System\Classes\PluginBase;
@@ -11,6 +12,7 @@ use Winter\Translate\Models\Message;
 use Mercator\LlmTranslate\Classes\BulkTranslator;
 use Mercator\LlmTranslate\Models\Provenance;
 use Mercator\LlmTranslate\Models\Settings;
+use Winter\Translate\Models\Setting as TranslateSetting;
 
 /**
  * Mercator.LlmTranslate - adds OpenAI-/Anthropic-compatible translation
@@ -47,16 +49,6 @@ class Plugin extends PluginBase
     public function registerSettings()
     {
         return [
-            'settings' => [
-                'label'       => 'mercator.llmtranslate::lang.settings.label',
-                'description' => 'mercator.llmtranslate::lang.settings.description',
-                'icon'        => 'icon-language',
-                'class'       => Settings::class,
-                'order'       => 553,
-                'category'    => 'winter.translate::lang.plugin.name',
-                'permissions' => ['mercator.llmtranslate.manage_settings'],
-                'keywords'    => 'llm openai anthropic ollama translation machine translate',
-            ],
             'review' => [
                 'label'       => 'mercator.llmtranslate::lang.review.label',
                 'description' => 'mercator.llmtranslate::lang.review.description',
@@ -83,11 +75,20 @@ class Plugin extends PluginBase
         }
 
         $this->extendMessagesController();
+        $this->extendProviderSettingsForm();
         $this->trackHumanEdits();
     }
 
     public function register()
     {
+        // Must be registered before any plugin boots (Winter.Translate caches its
+        // settings instance during its own boot).
+        TranslateSetting::extend(function ($model) {
+            $model->addDynamicMethod('getLlmAutoProviderOptions', function () {
+                return Settings::providerOptions();
+            });
+        });
+
         $this->registerConsoleCommand('llmtranslate.models', Console\TranslateModels::class);
     }
 
@@ -177,6 +178,30 @@ class Plugin extends PluginBase
                 });
             });
         }
+    }
+
+    /**
+     * Adds an "LLM" tab to Settings -> Translation Providers.
+     */
+    protected function extendProviderSettingsForm(): void
+    {
+        Event::listen('backend.form.extendFields', function ($widget) {
+            if (!$widget->model instanceof TranslateSetting || $widget->isNested) {
+                return;
+            }
+
+            $tab = 'mercator.llmtranslate::lang.settings.tab';
+            $fields = [];
+            $defs = \Yaml::parseFile(plugins_path('mercator/llmtranslate/models/settings/fields.yaml'))['fields'];
+            foreach ($defs as $name => $def) {
+                $def['tab'] = $tab;
+                if (isset($def['trigger']['field'])) {
+                    $def['trigger']['field'] = Settings::PREFIX . $def['trigger']['field'];
+                }
+                $fields[Settings::PREFIX . $name] = $def;
+            }
+            $widget->addTabFields($fields);
+        });
     }
 
     protected function extendMessagesController(): void

@@ -27,7 +27,7 @@ class Plugin extends PluginBase
         return [
             'name'        => 'mercator.llmtranslate::lang.plugin.name',
             'description' => 'mercator.llmtranslate::lang.plugin.description',
-            'author'      => 'Mercator',
+            'author'      => 'Helmut Kaufmann',
             'icon'        => 'icon-language',
         ];
     }

@@ -30,6 +30,10 @@
     <a href="javascript:;" class="btn btn-success oc-icon-check" data-request="onApproveAll"
        data-request-confirm="<?= $t('approve_all_confirm', ['count' => $total]) ?>"><?= $t('approve_all') ?> (<?= $total ?>)</a>
     <?php endif ?>
+    <?php if ($f['status'] === 'machine' && $total): ?>
+    <a href="javascript:;" class="btn btn-danger oc-icon-trash-o" data-request="onDeleteAll"
+       data-request-confirm="<?= $t('delete_all_confirm', ['count' => $total]) ?>"><?= $t('delete_all') ?></a>
+    <?php endif ?>
 </div>
 
 <?php if (!$rows->count()): ?>
@@ -68,14 +72,16 @@
             <span class="mt-chip"><?= e($row->provider) ?></span>
             <?php if ($row->llm_model): ?><span class="mt-chip"><?= e($row->llm_model) ?></span><?php endif ?>
             <span><?= e(optional($row->translated_at)->format('d.m.Y H:i')) ?></span>
-            <?php if ($tgt !== null): ?>
             <div class="mt-actions">
+                <a href="javascript:;" class="btn btn-default btn-sm mt-delete oc-icon-trash-o" data-request="onDelete" data-request-data="id: <?= $row->id ?>"
+                   data-request-confirm="<?= $t($tgt === null ? 'delete_record_confirm' : 'delete_confirm') ?>"><?= $t('delete') ?></a>
+                <?php if ($tgt !== null): ?>
                 <a href="javascript:;" class="btn btn-primary btn-sm mt-save oc-icon-save" data-request="onSaveRow" data-request-data="id: <?= $row->id ?>"><?= $t('save_approve') ?></a>
                 <?php if (!$done): ?>
                 <a href="javascript:;" class="btn btn-success btn-sm mt-approve oc-icon-check" data-request="onApprove" data-request-data="id: <?= $row->id ?>"><?= $t('approve') ?></a>
                 <?php endif ?>
+                <?php endif ?>
             </div>
-            <?php endif ?>
         </div>
     </div>
     <?php endforeach ?>

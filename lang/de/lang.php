@@ -49,6 +49,12 @@ return [
         'done_remaining' => ':count Meldungen übersetzt, :remaining verbleibend – erneut ausführen.',
     ],
     'review' => [
+        'deleted_n' => ':count Übersetzungen gelöscht.',
+        'delete' => 'Löschen',
+        'delete_confirm' => 'Diese Übersetzung löschen? Der Zieltext wird entfernt, die Quelle bleibt.',
+        'delete_record_confirm' => 'Das Element existiert nicht mehr. Diesen Eintrag entfernen?',
+        'delete_all' => 'Alle ungeprüften löschen',
+        'delete_all_confirm' => 'Alle :count ungeprüften Übersetzungen dieses Filters löschen? Geprüfte bleiben erhalten.',
         'approved_n' => ':count Übersetzungen freigegeben.',
         'saved' => 'Übersetzung gespeichert und als geprüft markiert.',
         'status_machine' => 'Ungeprüft',

@@ -109,6 +109,12 @@ class Plugin extends PluginBase
             });
         });
 
+        Message::extend(function ($message) {
+            $message->bindEvent('model.afterDelete', function () use ($message) {
+                Provenance::forget('message', '', (int) $message->id);
+            });
+        });
+
         // Attribute translations are written with raw queries by Winter.Translate
         // (no Attribute model events), so hook the translatable models themselves.
         // Runs before the behavior syncs (higher priority) so dirty state is intact.
@@ -125,6 +131,9 @@ class Plugin extends PluginBase
 
         foreach ($classes as $class) {
             $class::extend(function ($model) {
+                $model->bindEvent('model.afterDelete', function () use ($model) {
+                    Provenance::forget('attribute', $model->getMorphClass(), (int) $model->getKey());
+                });
                 $model->bindEvent('model.saveInternal', function () use ($model) {
                     if (!$model->getKey()) {
                         return;

@@ -106,6 +106,29 @@ class Review extends Controller
         return $this->refresh();
     }
 
+    /** Deletes one translation (value + record). Also removes records of vanished items. */
+    public function onDelete()
+    {
+        Provenance::findOrFail((int) post('id'))->discard();
+        Flash::success(Lang::get('mercator.llmtranslate::lang.review.deleted_n', ['count' => 1]));
+        return $this->refresh();
+    }
+
+    /** Deletes every UNREVIEWED translation matching the filter. Reviewed ones are never touched. */
+    public function onDeleteAll()
+    {
+        $n = 0;
+        $this->filtered()->where('status', Provenance::MACHINE)->orderBy('id')->chunkById(100, function ($rows) use (&$n) {
+            foreach ($rows as $row) {
+                $row->discard();
+                $n++;
+            }
+        });
+        Flash::success(Lang::get('mercator.llmtranslate::lang.review.deleted_n', ['count' => $n]));
+        request()->request->set('page', 1);
+        return $this->refresh();
+    }
+
     /* ---- Model attribute translation ---- */
 
     public function onLoadTranslateModels()

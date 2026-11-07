@@ -119,12 +119,42 @@ class Provenance extends Model
         return (string) $m->noFallbackLocale()->getAttributeTranslated($this->field, $this->locale);
     }
 
+    /**
+     * Removes the translated value (if the item still exists) and this record.
+     * Only the target locale is touched; the source is never modified.
+     */
+    public function discard(): void
+    {
+        if ($m = $this->targetModel()) {
+            static::withoutTracking(function () use ($m) {
+                if ($this->kind === 'message') {
+                    $m->toLocale($this->locale, null); // null removes the locale entry
+                }
+                else {
+                    $m->setAttributeTranslated($this->field, '', $this->locale);
+                    $m->save();
+                }
+            });
+        }
+        $this->delete();
+    }
+
+    /** Drops records of items that were deleted. */
+    public static function forget(string $kind, string $type, int $id): void
+    {
+        static::where(['kind' => $kind, 'model_type' => $type, 'model_id' => $id])->delete();
+    }
+
     /** Saves a reviewer's corrected text and marks the row reviewed. */
     public function saveTargetText(string $text): void
     {
         $m = $this->targetModel();
         if (!$m) {
             throw new \ApplicationException('The translated item no longer exists.');
+        }
+        if (trim($text) === '') {
+            $this->discard();
+            return;
         }
         static::withoutTracking(function () use ($m, $text) {
             if ($this->kind === 'message') {

@@ -49,6 +49,12 @@ return [
         'done_remaining' => ':count messages translated, :remaining remaining - run again to continue.',
     ],
     'review' => [
+        'deleted_n' => ':count translations deleted.',
+        'delete' => 'Delete',
+        'delete_confirm' => 'Delete this translation? The target text is removed; the source is kept.',
+        'delete_record_confirm' => 'The item no longer exists. Remove this record?',
+        'delete_all' => 'Delete all unreviewed',
+        'delete_all_confirm' => 'Delete all :count unreviewed translations in this filter? Reviewed translations are kept.',
         'approved_n' => ':count translations approved.',
         'saved' => 'Translation saved and marked reviewed.',
         'status_machine' => 'Unreviewed',

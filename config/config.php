@@ -22,4 +22,7 @@ return [
 
     // Max messages translated per click in Settings -> Translate messages.
     'max_per_run' => 200,
+
+    // Model attributes never machine-translated (URLs / identifiers).
+    'skip_fields' => ['slug'],
 ];

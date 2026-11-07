@@ -1,2 +1,5 @@
 1.0.0:
     - First version of Mercator.LlmTranslate
+1.1.0:
+    - Machine-translation provenance and review workflow, model attribute translation
+    - create_provenance_table.php

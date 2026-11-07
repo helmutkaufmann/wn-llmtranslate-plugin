@@ -46,3 +46,9 @@ fields:
         commentAbove: mercator.llmtranslate::lang.settings.glossary_comment
         type: textarea
         size: small
+    models:
+        label: mercator.llmtranslate::lang.settings.models
+        commentAbove: mercator.llmtranslate::lang.settings.models_comment
+        type: textarea
+        size: small
+        placeholder: RainLab\\Blog\\Models\\Post

@@ -8,7 +8,8 @@ use System\Classes\PluginBase;
 use Winter\Translate\Controllers\Messages;
 use Winter\Translate\Models\Locale;
 use Winter\Translate\Models\Message;
-use Winter\Translate\Providers\ProviderFactory;
+use Mercator\LlmTranslate\Classes\BulkTranslator;
+use Mercator\LlmTranslate\Models\Provenance;
 use Mercator\LlmTranslate\Models\Settings;
 
 /**
@@ -36,6 +37,10 @@ class Plugin extends PluginBase
                 'label' => 'mercator.llmtranslate::lang.permissions.manage_settings',
                 'tab'   => 'mercator.llmtranslate::lang.plugin.name',
             ],
+            'mercator.llmtranslate.review' => [
+                'label' => 'mercator.llmtranslate::lang.permissions.review',
+                'tab'   => 'mercator.llmtranslate::lang.plugin.name',
+            ],
         ];
     }
 
@@ -51,6 +56,15 @@ class Plugin extends PluginBase
                 'category'    => 'winter.translate::lang.plugin.name',
                 'permissions' => ['mercator.llmtranslate.manage_settings'],
                 'keywords'    => 'llm openai anthropic ollama translation machine translate',
+            ],
+            'review' => [
+                'label'       => 'mercator.llmtranslate::lang.review.label',
+                'description' => 'mercator.llmtranslate::lang.review.description',
+                'icon'        => 'icon-check-square-o',
+                'url'         => Backend::url('mercator/llmtranslate/review'),
+                'order'       => 554,
+                'category'    => 'winter.translate::lang.plugin.name',
+                'permissions' => ['mercator.llmtranslate.review'],
             ],
         ];
     }
@@ -68,6 +82,57 @@ class Plugin extends PluginBase
         }
 
         $this->extendMessagesController();
+        $this->trackHumanEdits();
+    }
+
+    public function register()
+    {
+        $this->registerConsoleCommand('llmtranslate.models', Console\TranslateModels::class);
+    }
+
+    /**
+     * A person changing a machine-translated value turns it into "reviewed".
+     * The plugin's own writes are excluded via Provenance::withoutTracking().
+     */
+    protected function trackHumanEdits(): void
+    {
+        Message::extend(function ($message) {
+            $message->bindEvent('model.afterSave', function () use ($message) {
+                $old = $message->getOriginal('message_data');
+                $old = is_string($old) ? (json_decode($old, true) ?: []) : (array) $old;
+                $new = (array) $message->message_data;
+                foreach (array_keys(array_diff_assoc($new, $old)) as $locale) {
+                    Provenance::markEdited('message', '', (int) $message->id, '', (string) $locale);
+                }
+            });
+        });
+
+        // Attribute translations are written with raw queries by Winter.Translate
+        // (no Attribute model events), so hook the translatable models themselves.
+        // Runs before the behavior syncs (higher priority) so dirty state is intact.
+        if (!App::runningInBackend() && !App::runningInConsole()) {
+            return;
+        }
+        try {
+            $classes = BulkTranslator::configuredModels();
+        }
+        catch (\Throwable $e) {
+            return;
+        }
+        foreach ($classes as $class) {
+            $class::extend(function ($model) {
+                $model->bindEvent('model.saveInternal', function () use ($model) {
+                    if (!$model->getKey()) {
+                        return;
+                    }
+                    foreach ($model->getDirtyLocales() as $locale) {
+                        foreach (array_keys($model->getTranslateDirty($locale)) as $field) {
+                            Provenance::markEdited('attribute', $model->getMorphClass(), (int) $model->getKey(), (string) $field, (string) $locale);
+                        }
+                    }
+                }, 100);
+            });
+        }
     }
 
     protected function extendMessagesController(): void
@@ -108,57 +173,27 @@ class Plugin extends PluginBase
             throw new \ApplicationException(Lang::get('mercator.llmtranslate::lang.messages.no_provider'));
         }
 
-        $fromCode = (string) post('locale_from') ?: null;
-        $sourceLang = $fromCode ?: optional(Locale::getDefault())->code ?: 'en';
-
-        if (post('all_languages')) {
-            $targets = Locale::isEnabled()->pluck('code')->all();
-        }
-        else {
-            $targets = array_filter([(string) post('locale_to')]);
-        }
-        $targets = array_values(array_filter($targets, function ($code) use ($sourceLang) {
-            return $code !== $sourceLang && Locale::findByCode($code);
-        }));
+        $targets = post('all_languages') ? BulkTranslator::enabledCodes() : array_filter([(string) post('locale_to')]);
         if (!$targets) {
             throw new \ApplicationException(Lang::get('mercator.llmtranslate::lang.messages.no_target'));
         }
 
-        $overwrite = (bool) post('overwrite');
-        $max = (int) config('mercator.llmtranslate::max_per_run', 200);
-        $translator = ProviderFactory::create($provider);
         @set_time_limit(0);
+        [$done, $remaining] = BulkTranslator::messages(
+            $provider,
+            (string) post('locale_from') ?: null,
+            $targets,
+            (bool) post('overwrite'),
+            (int) config('mercator.llmtranslate::max_per_run', 200)
+        );
 
-        $done = 0;
-        $remaining = 0;
-        foreach ($targets as $toCode) {
-            $todo = [];
-            $total = 0;
-            foreach (Message::orderBy('id')->cursor() as $message) {
-                $source = $message->forLocale($fromCode);
-                if (!is_string($source) || trim($source) === '') {
-                    continue;
-                }
-                if (!$overwrite && $message->forLocale($toCode)) {
-                    continue;
-                }
-                $total++;
-                if (count($todo) < $max) {
-                    $todo[] = [$message, $source];
-                }
-            }
-            if (!$todo) {
-                continue;
-            }
+        static::flashResult($done, $remaining);
 
-            $translated = $translator->translate(array_column($todo, 1), $toCode, $sourceLang);
-            foreach ($todo as $i => [$message]) {
-                $message->toLocale($toCode, $translated[$i]);
-            }
-            $done += count($todo);
-            $remaining += $total - count($todo);
-        }
+        return $controller->onRefresh();
+    }
 
+    public static function flashResult(int $done, int $remaining): void
+    {
         if (!$done) {
             Flash::info(Lang::get('mercator.llmtranslate::lang.messages.nothing'));
         }
@@ -168,7 +203,5 @@ class Plugin extends PluginBase
                 ['count' => $done, 'remaining' => $remaining]
             ));
         }
-
-        return $controller->onRefresh();
     }
 }

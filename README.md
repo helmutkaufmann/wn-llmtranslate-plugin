@@ -26,10 +26,17 @@ It extends Winter.Translate without modifying it: the LLM endpoints appear next 
 
 ## Installation
 
-Place the plugin in `plugins/mercator/llmtranslate`, then:
+Install with Composer:
 
 ```bash
+composer require mercator/wn-llmtranslate-plugin
 php artisan winter:up
+```
+
+Until the package is listed on Packagist, add the GitHub repository first:
+
+```bash
+composer config repositories.llmtranslate vcs https://github.com/helmutkaufmann/wn-llmtranslate-plugin
 ```
 
 ## Configuration

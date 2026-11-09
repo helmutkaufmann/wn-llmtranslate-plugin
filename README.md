@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/logo.svg" alt="LlmTranslate logo" width="128"></p>
+<p align="center"><img src="assets/banner.gif" alt="LlmTranslate" width="100%"></p>
 
 # Mercator.LlmTranslate
 

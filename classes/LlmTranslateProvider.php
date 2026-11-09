@@ -83,6 +83,24 @@ class LlmTranslateProvider extends AbstractTranslationProvider
         return $locale && $locale->name ? "{$locale->name} ({$code})" : $code;
     }
 
+    /**
+     * Connectivity check used by the settings "Test" button: one tiny real
+     * completion. Returns the model reply and the round-trip time.
+     *
+     * @return array{reply:string, ms:int, url:string}
+     */
+    public function ping(): array
+    {
+        $start = microtime(true);
+        $reply = $this->complete('You are a translator. Reply with the German translation only.', 'Hello world');
+
+        return [
+            'reply' => trim(preg_replace('/<think>.*?<\/think>/s', '', $reply)),
+            'ms'    => (int) round((microtime(true) - $start) * 1000),
+            'url'   => (string) $this->config['url'],
+        ];
+    }
+
     protected function complete(string $system, string $user): string
     {
         $url = rtrim($this->config['url'], '/');
@@ -135,7 +153,12 @@ class LlmTranslateProvider extends AbstractTranslationProvider
     protected function assertOk($response): void
     {
         if (!$response->successful()) {
-            throw new Exception('LLM translation failed: HTTP ' . $response->status());
+            $detail = $response->json('error.message') ?? $response->json('error');
+            $detail = is_string($detail) ? $detail : '';
+            if ($response->status() === 401 && $detail === '') {
+                $detail = 'API key missing or invalid';
+            }
+            throw new Exception('LLM translation failed: HTTP ' . $response->status() . ($detail !== '' ? ' - ' . mb_substr($detail, 0, 200) : ''));
         }
     }
 

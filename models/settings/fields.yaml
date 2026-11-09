@@ -36,6 +36,10 @@ fields:
                     label: mercator.llmtranslate::lang.settings.batch_size
                     type: number
                     span: right
+                test:
+                    type: partial
+                    path: $/mercator/llmtranslate/partials/_test_button.php
+                    span: full
     instructions:
         label: mercator.llmtranslate::lang.settings.instructions
         commentAbove: mercator.llmtranslate::lang.settings.instructions_comment

@@ -28,13 +28,22 @@
                 <input type="checkbox" name="overwrite" value="1" id="mtOverwrite">
                 <label for="mtOverwrite"><?= e(trans('mercator.llmtranslate::lang.messages.overwrite')) ?></label>
             </div>
+        <input type="hidden" name="progress_token" value="<?= e($token) ?>" />
+        <div class="mt-progress" style="display:none"
+            data-wait="<?= e(trans('mercator.llmtranslate::lang.messages.progress_wait')) ?>"
+            data-done="<?= e(trans('mercator.llmtranslate::lang.messages.progress_done')) ?>"
+            data-into="<?= e(trans('mercator.llmtranslate::lang.messages.progress_into')) ?>"
+            data-keep="<?= e(trans('mercator.llmtranslate::lang.messages.progress_keep_open')) ?>">
+            <div class="mt-progress-track"><div class="mt-progress-bar"></div></div>
+            <div class="mt-progress-text"></div>
+        </div>
         <?php endif ?>
     </div>
     <div class="modal-footer">
         <?php if ($providers): ?>
         <button type="submit" class="btn btn-primary"
             data-request="onMachineTranslateMessages"
-            data-request-success="$(this).trigger('close.oc.popup')"
+            data-mt-run data-request-success="$(this).trigger('close.oc.popup')"
             data-load-indicator="..."><?= e(trans('mercator.llmtranslate::lang.messages.run')) ?></button>
         <?php endif ?>
         <button type="button" class="btn btn-default" data-dismiss="popup"><?= e(trans('backend::lang.form.cancel')) ?></button>

@@ -28,13 +28,14 @@ class BulkTranslator
      * @param  string[]    $targets
      * @return array{0:int,1:int} [translated, remaining]
      */
-    public static function messages(string $provider, ?string $from, array $targets, bool $overwrite, int $max): array
+    public static function messages(string $provider, ?string $from, array $targets, bool $overwrite, int $max, ?string $token = null): array
     {
         $sourceLang = $from ?: static::defaultCode();
         $translator = ProviderFactory::create($provider);
+        $chunk = static::chunkSize($provider);
         $done = $remaining = 0;
 
-        foreach (static::cleanTargets($targets, $sourceLang) as $to) {
+        $collect = function (string $to) use ($from, $overwrite, $max): array {
             $todo = [];
             $total = 0;
             foreach (Message::orderBy('id')->cursor() as $message) {
@@ -50,22 +51,42 @@ class BulkTranslator
                     $todo[] = [$message, $source];
                 }
             }
-            if (!$todo) {
-                continue;
-            }
+            return [$todo, $total];
+        };
 
-            $out = $translator->translate(array_column($todo, 1), $to, $sourceLang);
-            Provenance::withoutTracking(function () use ($todo, $out, $to, $from, $provider) {
-                foreach ($todo as $i => [$message]) {
-                    $message->toLocale($to, $out[$i]);
-                    Provenance::record('message', '', $message->id, '', $to, $from, $provider);
-                }
-            });
+        // Count first so the progress bar knows the total. Records are re-read
+        // per language below, so one language's save never clobbers another's.
+        $targets = static::cleanTargets($targets, $sourceLang);
+        $grand = 0;
+        foreach ($targets as $to) {
+            $grand += count($collect($to)[0]);
+        }
+        Progress::start($token, $grand);
+
+        foreach ($targets as $to) {
+            [$todo, $total] = $collect($to);
+            foreach (array_chunk($todo, $chunk) as $part) {
+                $out = $translator->translate(array_column($part, 1), $to, $sourceLang);
+                Provenance::withoutTracking(function () use ($part, $out, $to, $from, $provider) {
+                    foreach ($part as $i => [$message]) {
+                        $message->toLocale($to, $out[$i]);
+                        Provenance::record('message', '', $message->id, '', $to, $from, $provider);
+                    }
+                });
+                Progress::advance($token, count($part), $to);
+            }
             $done += count($todo);
             $remaining += $total - count($todo);
         }
+        Progress::finish($token);
 
         return [$done, $remaining];
+    }
+
+    /** Items per provider request; one progress step each. */
+    protected static function chunkSize(string $provider): int
+    {
+        return max(1, (int) config("winter.translate::providers.$provider.batch_size", 20));
     }
 
     /**
@@ -83,7 +104,7 @@ class BulkTranslator
      * @param  string[]|null $fields  limit to these attributes (default: all string ones)
      * @return array{0:int,1:int} [translated values, remaining]
      */
-    public static function models(string $provider, string $class, ?string $from, array $targets, bool $overwrite, int $max, ?array $fields = null): array
+    public static function models(string $provider, string $class, ?string $from, array $targets, bool $overwrite, int $max, ?array $fields = null, ?string $token = null): array
     {
         if (!static::isTranslatableModel($class)) {
             throw new \ApplicationException("$class is not a translatable model.");
@@ -92,12 +113,10 @@ class BulkTranslator
         $default = static::defaultCode();
         $sourceLang = $from ?: $default;
         $translator = ProviderFactory::create($provider);
+        $chunk = static::chunkSize($provider);
         $done = $remaining = 0;
 
-        foreach (static::cleanTargets($targets, $sourceLang) as $to) {
-            if ($to === $default) {
-                continue; // the default language lives in the base columns
-            }
+        $collect = function (string $to) use ($class, $fields, $sourceLang, $overwrite, $max): array {
             $jobs = [];
             $total = 0;
             foreach ($class::query()->orderBy((new $class)->getKeyName())->cursor() as $model) {
@@ -120,25 +139,40 @@ class BulkTranslator
                     }
                 }
             }
-            if (!$jobs) {
-                continue;
-            }
+            return [$jobs, $total];
+        };
 
-            $out = $translator->translate(array_column($jobs, 2), $to, $sourceLang);
-            Provenance::withoutTracking(function () use ($jobs, $out, $to, $from, $provider) {
-                $saved = [];
-                foreach ($jobs as $i => [$model, $name]) {
-                    $model->setAttributeTranslated($name, $out[$i], $to);
-                    $saved[spl_object_id($model)] = $model;
-                    Provenance::record('attribute', $model->getMorphClass(), (int) $model->getKey(), $name, $to, $from, $provider);
-                }
-                foreach ($saved as $model) {
-                    $model->save();
-                }
-            });
+        // The default language lives in the base columns: never a target.
+        $targets = array_values(array_filter(static::cleanTargets($targets, $sourceLang), function ($to) use ($default) {
+            return $to !== $default;
+        }));
+        $grand = 0;
+        foreach ($targets as $to) {
+            $grand += count($collect($to)[0]);
+        }
+        Progress::start($token, $grand);
+
+        foreach ($targets as $to) {
+            [$jobs, $total] = $collect($to);
+            foreach (array_chunk($jobs, $chunk) as $part) {
+                $out = $translator->translate(array_column($part, 2), $to, $sourceLang);
+                Provenance::withoutTracking(function () use ($part, $out, $to, $from, $provider) {
+                    $saved = [];
+                    foreach ($part as $i => [$model, $name]) {
+                        $model->setAttributeTranslated($name, $out[$i], $to);
+                        $saved[spl_object_id($model)] = $model;
+                        Provenance::record('attribute', $model->getMorphClass(), (int) $model->getKey(), $name, $to, $from, $provider);
+                    }
+                    foreach ($saved as $model) {
+                        $model->save();
+                    }
+                });
+                Progress::advance($token, count($part), $to);
+            }
             $done += count($jobs);
             $remaining += $total - count($jobs);
         }
+        Progress::finish($token);
 
         return [$done, $remaining];
     }

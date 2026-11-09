@@ -1,0 +1,6 @@
+.mt-progress { margin-top: 15px }
+.mt-progress-track { height: 10px; border-radius: 5px; background: rgba(127,127,127,.25); overflow: hidden }
+.mt-progress-bar { height: 100%; width: 0; background: #2ecc71; transition: width .4s ease }
+.mt-progress.is-waiting .mt-progress-bar { width: 30%; animation: mt-slide 1.2s ease-in-out infinite alternate }
+.mt-progress-text { margin-top: 6px; font-size: 13px; opacity: .8 }
+@keyframes mt-slide { from { margin-left: 0 } to { margin-left: 70% } }

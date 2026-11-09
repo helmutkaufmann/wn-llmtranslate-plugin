@@ -210,6 +210,9 @@ class Plugin extends PluginBase
                 $fields[Settings::PREFIX . $name] = $def;
             }
             $widget->addTabFields($fields);
+            if (method_exists($widget->getController(), 'addJs')) {
+                $widget->getController()->addJs('/plugins/mercator/llmtranslate/assets/js/test-endpoint.js');
+            }
         });
     }
 
@@ -217,6 +220,8 @@ class Plugin extends PluginBase
     {
         Messages::extend(function (Messages $controller) {
             $controller->addJs('/plugins/mercator/llmtranslate/assets/js/messages-button.js');
+            $controller->addJs('/plugins/mercator/llmtranslate/assets/js/mt-progress.js');
+            $controller->addCss('/plugins/mercator/llmtranslate/assets/css/mt-progress.css');
 
             $controller->addDynamicMethod('onLoadMachineTranslateForm', function () use ($controller) {
                 return $controller->makePartial('$/mercator/llmtranslate/partials/_machine_translate_form', [
@@ -225,7 +230,12 @@ class Plugin extends PluginBase
                     'localeTo'    => (string) post('locale_to'),
                     'defaultCode' => optional(Locale::getDefault())->code,
                     'max'         => (int) config('mercator.llmtranslate::max_per_run', 200),
+                    'token'       => \Str::random(24),
                 ]);
+            });
+
+            $controller->addDynamicMethod('onMtProgress', function () {
+                return Classes\Progress::get((string) post('progress_token'));
             });
 
             $controller->addDynamicMethod('onMachineTranslateMessages', function () use ($controller) {
@@ -262,7 +272,8 @@ class Plugin extends PluginBase
             (string) post('locale_from') ?: null,
             $targets,
             (bool) post('overwrite'),
-            (int) config('mercator.llmtranslate::max_per_run', 200)
+            (int) config('mercator.llmtranslate::max_per_run', 200),
+            (string) post('progress_token') ?: null
         );
 
         static::flashResult($done, $remaining);

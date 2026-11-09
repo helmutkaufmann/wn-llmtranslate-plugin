@@ -27,6 +27,8 @@ class Review extends Controller
         SettingsManager::setContext('Mercator.LlmTranslate', 'review');
         $this->addCss('/plugins/mercator/llmtranslate/assets/css/review.css');
         $this->addJs('/plugins/mercator/llmtranslate/assets/js/review.js');
+        $this->addJs('/plugins/mercator/llmtranslate/assets/js/mt-progress.js');
+        $this->addCss('/plugins/mercator/llmtranslate/assets/css/mt-progress.css');
     }
 
     public function index()
@@ -139,7 +141,13 @@ class Review extends Controller
             'locales'   => Locale::isEnabled()->get(),
             'default'   => BulkTranslator::defaultCode(),
             'max'       => (int) config('mercator.llmtranslate::max_per_run', 200),
+            'token'     => \Str::random(24),
         ]);
+    }
+
+    public function onMtProgress()
+    {
+        return \Mercator\LlmTranslate\Classes\Progress::get((string) post('progress_token'));
     }
 
     public function onTranslateModels()
@@ -160,7 +168,8 @@ class Review extends Controller
         @set_time_limit(0);
         [$done, $remaining] = BulkTranslator::models(
             $provider, $class, (string) post('locale_from') ?: null, $targets,
-            (bool) post('overwrite'), (int) config('mercator.llmtranslate::max_per_run', 200)
+            (bool) post('overwrite'), (int) config('mercator.llmtranslate::max_per_run', 200),
+            null, (string) post('progress_token') ?: null
         );
         Plugin::flashResult($done, $remaining);
 

@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/logo.svg" alt="LlmTranslate logo" width="128"></p>
+
 # Mercator.LlmTranslate
 
 Machine translation for [Winter.Translate](https://github.com/wintercms/wn-translate-plugin) through **any OpenAI-compatible or Anthropic-compatible API**: OpenAI, Anthropic, OpenRouter, and local servers such as **LM Studio**, **Ollama**, llama.cpp or vLLM.

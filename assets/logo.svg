@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="LlmTranslate">
+  <rect width="256" height="256" rx="48" fill="#1f2a44"/>
+  <path d="M40 60h112a16 16 0 0 1 16 16v64a16 16 0 0 1-16 16H92l-32 28v-28H40a16 16 0 0 1-16-16V76a16 16 0 0 1 16-16z" fill="#4f8cff"/>
+  <text x="96" y="124" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="64" font-weight="700" fill="#fff">A</text>
+  <path d="M120 120h104a16 16 0 0 1 16 16v56a16 16 0 0 1-16 16h-12v24l-28-24h-64a16 16 0 0 1-16-16v-56a16 16 0 0 1 16-16z" fill="#ffb347" transform="translate(-8 4)"/>
+  <text x="176" y="196" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="56" font-weight="700" fill="#1f2a44">文</text>
+</svg>

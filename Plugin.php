@@ -63,15 +63,13 @@ class Plugin extends PluginBase
 
     public function boot()
     {
-        // Needed in the backend (picker, Messages screen) and in console
-        // processes (artisan command, queue worker running auto-translate jobs).
-        if (App::runningInBackend() || App::runningInConsole()) {
-            try {
-                Settings::applyConfigValues();
-            }
-            catch (\Throwable $e) {
-                // settings table missing during install/migrate
-            }
+        // Needed wherever translation can run: backend (picker, Messages screen),
+        // console (artisan, queue workers) and web requests (sync queue driver).
+        try {
+            Settings::applyConfigValues();
+        }
+        catch (\Throwable $e) {
+            // settings table missing during install/migrate
         }
 
         $this->extendMessagesController();
